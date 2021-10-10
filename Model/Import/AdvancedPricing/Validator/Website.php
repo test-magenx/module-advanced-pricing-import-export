@@ -8,12 +8,10 @@ declare(strict_types=1);
 
 namespace Magento\AdvancedPricingImportExport\Model\Import\AdvancedPricing\Validator;
 
-use Magento\AdvancedPricingImportExport\Model\CurrencyResolver;
 use Magento\AdvancedPricingImportExport\Model\Import\AdvancedPricing;
 use Magento\CatalogImportExport\Model\Import\Product\RowValidatorInterface;
 use Magento\CatalogImportExport\Model\Import\Product\StoreResolver;
 use Magento\CatalogImportExport\Model\Import\Product\Validator\AbstractImportValidator;
-use Magento\Framework\App\ObjectManager;
 use Magento\Store\Model\Website as WebsiteModel;
 
 class Website extends AbstractImportValidator implements RowValidatorInterface
@@ -29,23 +27,15 @@ class Website extends AbstractImportValidator implements RowValidatorInterface
     protected $websiteModel;
 
     /**
-     * @var CurrencyResolver
-     */
-    private $currencyResolver;
-
-    /**
      * @param StoreResolver $storeResolver
      * @param WebsiteModel $websiteModel
-     * @param CurrencyResolver|null $currencyResolver
      */
     public function __construct(
         StoreResolver $storeResolver,
-        WebsiteModel $websiteModel,
-        ?CurrencyResolver $currencyResolver = null
+        WebsiteModel $websiteModel
     ) {
         $this->storeResolver = $storeResolver;
         $this->websiteModel = $websiteModel;
-        $this->currencyResolver = $currencyResolver ?? ObjectManager::getInstance()->get(CurrencyResolver::class);
     }
 
     /**
@@ -95,6 +85,6 @@ class Website extends AbstractImportValidator implements RowValidatorInterface
     public function getAllWebsitesValue()
     {
         return AdvancedPricing::VALUE_ALL_WEBSITES .
-            ' [' . $this->currencyResolver->getDefaultBaseCurrency() . ']';
+            ' [' . $this->websiteModel->getBaseCurrency()->getCurrencyCode() . ']';
     }
 }

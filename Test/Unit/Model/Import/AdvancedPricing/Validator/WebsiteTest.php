@@ -7,10 +7,10 @@ declare(strict_types=1);
 
 namespace Magento\AdvancedPricingImportExport\Test\Unit\Model\Import\AdvancedPricing\Validator;
 
-use Magento\AdvancedPricingImportExport\Model\CurrencyResolver;
 use Magento\AdvancedPricingImportExport\Model\Import\AdvancedPricing as AdvancedPricing;
 use Magento\AdvancedPricingImportExport\Model\Import\AdvancedPricing\Validator\Website as WebsiteValidator;
 use Magento\CatalogImportExport\Model\Import\Product\StoreResolver;
+use Magento\Directory\Model\Currency;
 use Magento\Store\Model\Website;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -32,11 +32,6 @@ class WebsiteTest extends TestCase
      */
     protected $website;
 
-    /**
-     * @var CurrencyResolver|MockObject
-     */
-    private $currencyResolver;
-
     protected function setUp(): void
     {
         $this->webSiteModel = $this->getMockBuilder(Website::class)
@@ -48,16 +43,11 @@ class WebsiteTest extends TestCase
             ['getWebsiteCodeToId']
         );
 
-        $this->currencyResolver = $this->createPartialMock(
-            CurrencyResolver::class,
-            ['getDefaultBaseCurrency']
-        );
-
         $this->website = $this->getMockBuilder(
             WebsiteValidator::class
         )
             ->setMethods(['getAllWebsitesValue', '_clearMessages', '_addMessages'])
-            ->setConstructorArgs([$this->storeResolver, $this->webSiteModel, $this->currencyResolver])
+            ->setConstructorArgs([$this->storeResolver, $this->webSiteModel])
             ->getMock();
     }
 
@@ -114,15 +104,17 @@ class WebsiteTest extends TestCase
     public function testGetAllWebsitesValue()
     {
         $currencyCode = 'currencyCodeValue';
+        $currency = $this->createPartialMock(Currency::class, ['getCurrencyCode']);
+        $currency->expects($this->once())->method('getCurrencyCode')->willReturn($currencyCode);
 
-        $this->currencyResolver->expects($this->once())->method('getDefaultBaseCurrency')->willReturn($currencyCode);
+        $this->webSiteModel->expects($this->once())->method('getBaseCurrency')->willReturn($currency);
 
         $expectedResult = AdvancedPricing::VALUE_ALL_WEBSITES . ' [' . $currencyCode . ']';
         $websiteString = $this->getMockBuilder(
             WebsiteValidator::class
         )
             ->setMethods(['_clearMessages', '_addMessages'])
-            ->setConstructorArgs([$this->storeResolver, $this->webSiteModel, $this->currencyResolver])
+            ->setConstructorArgs([$this->storeResolver, $this->webSiteModel])
             ->getMock();
         $result = $websiteString->getAllWebsitesValue();
 

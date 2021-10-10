@@ -486,8 +486,7 @@ class AdvancedPricing extends \Magento\CatalogImportExport\Model\Export\Product
             )
             ->where(
                 'ap.' . $productEntityLinkField . ' IN (?)',
-                $productIds,
-                \Zend_Db::INT_TYPE
+                $productIds
             );
 
         if ($priceFromFilter !== null) {
